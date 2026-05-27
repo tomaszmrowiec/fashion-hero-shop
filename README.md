@@ -1,88 +1,91 @@
-# AI Website Clone Template
+# FashionHero Shop
 
-A reusable template for reverse-engineering any website and rebuilding it as a pixel-perfect clone using [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
-
-Point it at a URL, run `/clone-website`, and Claude Code will inspect the site via Chrome MCP, extract design tokens and assets, write component specs, and dispatch parallel builder agents to reconstruct every section — all in isolated git worktrees that merge automatically.
-
-## Quick Start
-
-1. **Use this template** — click "Use this template" on GitHub (or clone it)
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-3. **Edit `TARGET.md`** — set the URL, scope, and fidelity level for the site you want to clone
-4. **Run the skill** in Claude Code:
-   ```
-   /clone-website <url>
-   ```
-5. **Customize** (optional) — after the base clone is built, modify as needed
-
-## Prerequisites
-
-- [Node.js](https://nodejs.org/) 20+
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with Chrome MCP enabled (required for site inspection)
+Educational e-commerce starter built for the **AI Product Heroes** workshops. Inspired by Allbirds design patterns — clean, sustainable, mobile-first. Students use this as a base to learn product development with AI tools.
 
 ## Tech Stack
 
 - **Next.js 16** — App Router, React 19, TypeScript strict
-- **shadcn/ui** — Radix primitives + Tailwind CSS v4
-- **Tailwind CSS v4** — oklch design tokens
-- **Lucide React** — default icons (replaced by extracted SVGs during cloning)
+- **Tailwind CSS v4** — oklch design tokens, custom color palette
+- **shadcn/ui** — Radix primitives
+- **Lucide React** — icons
 
-## How It Works
-
-The `/clone-website` skill runs a multi-phase pipeline:
-
-1. **Reconnaissance** — screenshots, design token extraction, interaction sweep (scroll, click, hover, responsive)
-2. **Foundation** — updates fonts, colors, globals, downloads all assets
-3. **Component Specs** — writes detailed spec files (`docs/research/components/`) with exact computed CSS values, states, behaviors, and content
-4. **Parallel Build** — dispatches builder agents in git worktrees, one per section/component
-5. **Assembly & QA** — merges worktrees, wires up the page, runs visual diff against the original
-
-Each builder agent receives the full component specification inline — exact `getComputedStyle()` values, interaction models, multi-state content, responsive breakpoints, and asset paths. No guessing.
-
-## Project Structure
-
-```
-src/
-  app/              # Next.js routes
-  components/       # React components
-    ui/             # shadcn/ui primitives
-    icons.tsx       # Extracted SVG icons
-  lib/utils.ts      # cn() utility
-  types/            # TypeScript interfaces
-  hooks/            # Custom React hooks
-public/
-  images/           # Downloaded images from target
-  videos/           # Downloaded videos from target
-  seo/              # Favicons, OG images
-docs/
-  research/         # Extraction output & component specs
-  design-references/ # Screenshots
-scripts/            # Asset download scripts
-TARGET.md           # Clone target configuration
-AGENTS.md           # Agent instructions & code style
-```
-
-## Commands
+## Getting Started
 
 ```bash
-npm run dev    # Start dev server
-npm run build  # Production build
-npm run lint   # ESLint check
+npm install
+npm run dev       # http://localhost:3000
+npm run build
+npm run lint
 ```
 
-## Configuration
+## Pages & Routes
 
-Edit **`TARGET.md`** before cloning:
+| Route | Description |
+|-------|-------------|
+| `/` | Homepage — hero carousel, category rows, product carousels |
+| `/collections/[slug]` | Product listing with sidebar filters (category, seller) |
+| `/products/[slug]` | Product detail — gallery, color/size picker, add to cart |
+| `/checkout` | **Version A** — standard checkout (shipping form + order summary) |
+| `/checkout/bpf` | **Version B** — same as A + Buyer Protection Fee (2.5%) A/B test |
+| `/potwierdzenie` | Order confirmation (Polish) |
+| `/wishlist` | Saved items |
+| `/about` | About page |
 
-- **URL** — the site to reverse-engineer
-- **Pages** — which pages to replicate
-- **Fidelity** — pixel-perfect, high fidelity, or structural
-- **Scope** — what's in/out of scope
-- **Customization plans** — modifications to apply after the base clone
+## A/B Checkout Test
 
-## License
+The shop includes a behavioral A/B test for a **Buyer Protection Fee (Ochrona zakupu)**:
 
-MIT
+- **Version A** `/checkout` — standard order summary (subtotal + shipping + total)
+- **Version B** `/checkout/bpf` — adds a highlighted 2.5% protection fee line with shield icon and one-line benefit description
+
+**Routing:** When a user clicks CHECKOUT in the cart drawer, they are randomly assigned to Version A or B (50/50, stored in `localStorage("ab_checkout")`). The assignment is stable per session.
+
+**Emergency override:** Both checkout pages show a floating `🧪 Wersja A/B` badge (bottom-right corner). Click it to manually switch between variants — useful for demos and testing.
+
+**Demo mode:** Visiting `/checkout/bpf` with an empty cart shows a sample order (dress, 189 PLN + 12 PLN shipping + 4.73 PLN BPF = 205.73 PLN) so the feature is immediately visible from a shared link.
+
+### Price calculation (Version B)
+
+```
+subtotal = sum(item.price × qty)
+shipping = subtotal >= 299 ? 0 : 19.90
+bpf      = subtotal × 0.025
+total    = subtotal + shipping + bpf
+```
+
+## Key Components
+
+| File | Purpose |
+|------|---------|
+| `src/components/cart-provider.tsx` | Cart state — items, add/remove, open/close |
+| `src/components/cart-drawer.tsx` | Slide-out cart with A/B routing on CHECKOUT |
+| `src/components/ab-badge.tsx` | Floating A/B variant switcher badge |
+| `src/components/shell.tsx` | Global layout — header, footer, providers; minimal mode for `/potwierdzenie` |
+| `src/data/products.ts` | Hardcoded product catalog (swap for real API) |
+| `src/types/index.ts` | `Product`, `CartItem`, `ProductColor` interfaces |
+
+## Design Tokens
+
+Warm, natural palette defined in `src/app/globals.css`:
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--color-charcoal` | `#212121` | Primary text, buttons |
+| `--color-cream` | `#ece9e2` | Page background |
+| `--color-cream-light` | `#f5f4f1` | Section backgrounds |
+| `--color-warm-gray` | `#6b6b6b` | Secondary text |
+| `--color-muted` | `#e0dad0` | Borders, highlights |
+
+## Data
+
+Products are hardcoded in `src/data/products.ts`. Each product has:
+- Name, slug, price (PLN), category, collections
+- Multiple color variants (with optional product images)
+- Size array, rating, seller ID
+- Badge (`new`, `bestseller`, `sale`)
+
+To connect a real backend, replace `getProduct()` / `getProductsByCollection()` in `src/data/products.ts` with API calls.
+
+## Workshop Context
+
+Built as part of **Wojtek's AI Product Heroes** program. The BPF checkout is an example of a behavioral test feature: build the hypothesis → ship the variant → measure whether users accept the fee or abandon.
