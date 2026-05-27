@@ -2,9 +2,19 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { CloseIcon, MinusIcon, PlusIcon } from "./icons";
 import type { CartItem } from "@/types";
+
+function getCheckoutVariant(): "a" | "b" {
+  if (typeof window === "undefined") return "a";
+  const stored = localStorage.getItem("ab_checkout");
+  if (stored === "a" || stored === "b") return stored;
+  const v: "a" | "b" = Math.random() < 0.5 ? "a" : "b";
+  localStorage.setItem("ab_checkout", v);
+  return v;
+}
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -21,6 +31,13 @@ export function CartDrawer({
   onUpdateQuantity,
   onRemove,
 }: CartDrawerProps) {
+  const [checkoutHref, setCheckoutHref] = useState("/checkout/bpf");
+
+  useEffect(() => {
+    const variant = getCheckoutVariant();
+    setCheckoutHref(variant === "b" ? "/checkout/bpf" : "/checkout");
+  }, []);
+
   const subtotal = items.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
     0
@@ -157,7 +174,7 @@ export function CartDrawer({
               Shipping and taxes calculated at checkout.
             </p>
             <Link
-              href="/checkout"
+              href={checkoutHref}
               className="btn-cta w-full block text-center"
               onClick={onClose}
             >

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCart } from "@/components/cart-provider";
+import { AbBadge } from "@/components/ab-badge";
 
 export default function CheckoutPage() {
   const { items } = useCart();
@@ -14,6 +15,8 @@ export default function CheckoutPage() {
   const total = subtotal + shipping;
 
   return (
+    <>
+    <AbBadge variant="a" />
     <main className="max-w-6xl mx-auto px-4 md:px-8 py-8 md:py-12">
       {/* Breadcrumb */}
       <nav className="mb-8">
@@ -186,5 +189,6 @@ export default function CheckoutPage() {
         </div>
       )}
     </main>
+    </>
   );
 }
