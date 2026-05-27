@@ -9,7 +9,7 @@ import { WishlistProvider, useWishlist } from "./wishlist-provider";
 import { QuickViewProvider } from "./quick-view-provider";
 import { AuthProvider } from "./auth-provider";
 
-const MINIMAL_ROUTES = ["/checkout/bpf", "/potwierdzenie"];
+const MINIMAL_ROUTES = ["/potwierdzenie"];
 
 function ShellInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
