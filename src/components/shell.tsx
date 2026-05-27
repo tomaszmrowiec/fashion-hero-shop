@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { AnnouncementBar } from "./announcement-bar";
 import { Header } from "./header";
 import { Footer } from "./footer";
@@ -8,9 +9,19 @@ import { WishlistProvider, useWishlist } from "./wishlist-provider";
 import { QuickViewProvider } from "./quick-view-provider";
 import { AuthProvider } from "./auth-provider";
 
+const MINIMAL_ROUTES = ["/checkout/bpf", "/potwierdzenie"];
+
 function ShellInner({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isMinimal = MINIMAL_ROUTES.some(
+    (r) => pathname === r || pathname.startsWith(r + "/")
+  );
   const { openCart, itemCount } = useCart();
   const { wishlistItems } = useWishlist();
+
+  if (isMinimal) {
+    return <>{children}</>;
+  }
 
   return (
     <>
